@@ -8,17 +8,37 @@ import (
 
 type Mux struct {
 	Providers map[string]Provider
+	// Caching?
 }
 
-func (m *Mux) String(key string) (string, error) {
+func (m *Mux) Validate() error {
+	for k, p := range m.Providers {
+		if _, err := p.Value(); err != nil {
+			return fmt.Errorf("mux: failed validation for '%s': %w", k, err)
+		}
+	}
+
+	return nil
+}
+
+func (m *Mux) Value(key string) (interface{}, error) {
 	provider, ok := m.Providers[key]
 	if !ok {
-		return "", fmt.Errorf("Mux: %s: %w", key, ProviderNotDefinedError)
+		return nil, fmt.Errorf("Mux: %s: %w", key, ProviderNotDefinedError)
 	}
 
 	v, err := provider.Value()
 	if err != nil {
-		return "", fmt.Errorf("Mux: %s: %w", key, err)
+		return nil, fmt.Errorf("Mux: %s: %w", key, err)
+	}
+
+	return v, nil
+}
+
+func (m *Mux) String(key string) (string, error) {
+	v, err := m.Value(key)
+	if err != nil {
+		return "", err
 	}
 
 	s, ok := v.(string)
@@ -39,7 +59,17 @@ func (m *Mux) MustString(key string) string {
 }
 
 func (m *Mux) Int(key string) (int, error) {
-	return 0, nil
+	v, err := m.Value(key)
+	if err != nil {
+		return 0, err
+	}
+
+	i, ok := v.(int)
+	if !ok {
+		return 0, fmt.Errorf("Mux: %s: %w", key, NewInvalidTypeError("int", reflect.TypeOf(v).String()))
+	}
+
+	return i, nil
 }
 
 func (m *Mux) MustInt(key string) int {

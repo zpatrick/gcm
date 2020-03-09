@@ -24,7 +24,8 @@ func Mux() (*gcm.Mux, error) {
 	m := &gcm.Mux{
 		Providers: map[string]gcm.Provider{
 			"redis.host": &gcm.StringProviderSchema{
-				Default: "localhost",
+				Default:       "localhost",
+				DefaultIsZero: true,
 				Provider: gcm.MultiStringProvider{
 					flagProvider.String("redis-host", "localhost", "redis host", false),
 					fileProvider.String("redis", "host"),
@@ -42,34 +43,10 @@ func Mux() (*gcm.Mux, error) {
 			},
 		},
 	}
-	/*
-		schema := gcm.MuxSchema{
-			KeySettings: map[string]gcm.SettingSchema{
-				"redis.host": gcm.StringSettingSchema{
-					Default: "locahost",
-					Provider: gcm.MultiStringProvider(
-						flagProvider.String("redis-host", "localhost", "redis host", false),
-						fileProvider.String("redis", "host"),
-						envProvider.String("APP_REDIS_HOST"),
-					),
-				},
-				"redis.port": gcm.IntSettingSchema{
-					Default:  6379,
-					Validate: gcm.ValidateIntBetween(0, 65535),
-					Provider: gcm.MultiIntProvider(
-						flagProvider.Int("redis-port", 6379, "redis port", false),
-						fileProvider.Int("redis", "port"),
-						envProvider.Int("APP_REDIS_PORT"),
-					),
-				},
-			},
-		}
-	*/
 
-	// m := gcm.NewMux(schema)
-	// if err := m.Validate(); err != nil {
-	// 	return nil, err
-	// }
+	if err := m.Validate(); err != nil {
+		return nil, err
+	}
 
 	return m, nil
 }

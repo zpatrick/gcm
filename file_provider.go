@@ -54,7 +54,7 @@ func (f *FileProvider) loadFields() (map[string]interface{}, error) {
 	if f.fields == nil || f.Reload() {
 		content, err := ioutil.ReadFile(f.Path)
 		if err != nil {
-			return nil, fmt.Errorf("failed to load %s: %w", f.Path, err)
+			return nil, fmt.Errorf("failed to read '%s': %w", f.Path, err)
 		}
 
 		fields, err := f.Parser(content)
