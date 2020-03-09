@@ -85,6 +85,12 @@ type Provider interface {
 	Value() (interface{}, error)
 }
 
+type ProviderFunc func() (interface{}, error)
+
+func (f ProviderFunc) Value() (interface{}, error) {
+	return f()
+}
+
 type StringProvider interface {
 	Value() (string, error)
 }
