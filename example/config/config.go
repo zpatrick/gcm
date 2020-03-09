@@ -23,7 +23,7 @@ func Mux() (*gcm.Mux, error) {
 
 	m := &gcm.Mux{
 		Providers: map[string]gcm.Provider{
-			"redis.host": &gcm.StringProviderSchema{
+			KeyRedisHost: &gcm.StringProviderSchema{
 				Default:       "localhost",
 				DefaultIsZero: true,
 				Provider: gcm.MultiStringProvider{
@@ -32,7 +32,7 @@ func Mux() (*gcm.Mux, error) {
 					envProvider.String("APP_REDIS_HOST"),
 				},
 			},
-			"redis.port": &gcm.IntProviderSchema{
+			KeyRedisPort: &gcm.IntProviderSchema{
 				Default:  6379,
 				Validate: gcm.ValidateIntBetween(0, 65535),
 				Provider: gcm.MultiIntProvider{
