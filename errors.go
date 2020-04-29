@@ -42,7 +42,6 @@ func NewInvalidTypeError(expected, actual string) *InvalidTypeError {
 		ExpectedType: expected,
 		ActualType:   actual,
 	}
-
 }
 
 func (i *InvalidTypeError) Error() string {

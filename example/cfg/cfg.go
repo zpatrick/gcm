@@ -1,4 +1,4 @@
-package config
+package cfg
 
 import (
 	"flag"
@@ -15,21 +15,31 @@ const (
 	KeyRedisPort = "redis.port"
 )
 
-// Mux returns the configuration mux for the application.
-func Mux() (*gcm.Mux, error) {
+type YAMLFileConfig struct {
+	Redis struct {
+		Host *string `json:"host" yaml:"host"`
+		Port *int    `json:"port" yaml:"port"`
+	} `json:"redis" yaml:"redis"`
+}
+
+// Load returns the configuration mux for the application.
+func Load() (*gcm.Mux, error) {
+	var yamlFile YAMLFileConfig
+	if err := gcm.LoadYAMLFile(ConfigFilePath, &yamlFile); err != nil {
+		return nil, err
+	}
+
 	flagProvider := gcm.NewFlagProvider(flag.NewFlagSet("app", flag.ContinueOnError))
-	fileProvider := gcm.NewFileProvider(ConfigFilePath, gcm.YAMLParser, gcm.ReloadNever)
 	envProvider := gcm.NewEnvironmentProvider()
 
 	m := &gcm.Mux{
 		Providers: map[string]gcm.Provider{
 			KeyRedisHost: &gcm.StringProviderSchema{
-				Default:       "localhost",
-				DefaultIsZero: true,
+				Default: "localhost",
 				Provider: gcm.MultiStringProvider{
 					flagProvider.String("redis-host", "localhost", "redis host", false),
-					fileProvider.String("redis", "host"),
 					envProvider.String("APP_REDIS_HOST"),
+					gcm.OptionalStaticString(yamlFile.Redis.Host),
 				},
 			},
 			KeyRedisPort: &gcm.IntProviderSchema{
@@ -37,8 +47,8 @@ func Mux() (*gcm.Mux, error) {
 				Validate: gcm.ValidateIntBetween(0, 65535),
 				Provider: gcm.MultiIntProvider{
 					flagProvider.Int("redis-port", 6379, "redis port", false),
-					fileProvider.Int("redis", "port"),
 					envProvider.Int("APP_REDIS_PORT"),
+					gcm.OptionalStaticInt(yamlFile.Redis.Port),
 				},
 			},
 		},

@@ -120,6 +120,22 @@ func (m MultiStringProvider) Value() (string, error) {
 	return "", fmt.Errorf("MultiStringProvider: %w", ValueNotProvidedError)
 }
 
+func StaticString(s string) StringProvider {
+	return StringProviderFunc(func() (string, error) {
+		return s, nil
+	})
+}
+
+func OptionalStaticString(s *string) StringProvider {
+	if s != nil {
+		return StaticString(*s)
+	}
+
+	return StringProviderFunc(func() (string, error) {
+		return "", ValueNotProvidedError
+	})
+}
+
 type StringValidator func(v string) error
 
 type StringProviderSchema struct {
@@ -179,6 +195,22 @@ func (m MultiIntProvider) Value() (int, error) {
 	}
 
 	return 0, fmt.Errorf("MultiIntProvider: %w", ValueNotProvidedError)
+}
+
+func StaticInt(i int) IntProvider {
+	return IntProviderFunc(func() (int, error) {
+		return i, nil
+	})
+}
+
+func OptionalStaticInt(i *int) IntProvider {
+	if i != nil {
+		return StaticInt(*i)
+	}
+
+	return IntProviderFunc(func() (int, error) {
+		return 0, ValueNotProvidedError
+	})
 }
 
 type IntValidator func(v int) error
