@@ -2,8 +2,11 @@ package cfg
 
 import (
 	"flag"
+	"fmt"
+	"io/ioutil"
 
 	"github.com/zpatrick/gcm"
+	"gopkg.in/yaml.v2"
 )
 
 // ConfigFilePath denotes the location of the configuration file.
@@ -22,11 +25,25 @@ type YAMLFileConfig struct {
 	} `json:"redis" yaml:"redis"`
 }
 
+func loadYAMLFile(path string) (YAMLFileConfig, error) {
+	content, err := ioutil.ReadFile(ConfigFilePath)
+	if err != nil {
+		return YAMLFileConfig{}, err
+	}
+
+	var yamlFile YAMLFileConfig
+	if err := yaml.Unmarshal(content, &yamlFile); err != nil {
+		return YAMLFileConfig{}, err
+	}
+
+	return yamlFile, nil
+}
+
 // Load returns the configuration mux for the application.
 func Load() (*gcm.Mux, error) {
-	var yamlFile YAMLFileConfig
-	if err := gcm.LoadYAMLFile(ConfigFilePath, &yamlFile); err != nil {
-		return nil, err
+	yamlFile, err := loadYAMLFile(ConfigFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load '%s': %w", ConfigFilePath, err)
 	}
 
 	flagProvider := gcm.NewFlagProvider(flag.NewFlagSet("app", flag.ContinueOnError))
