@@ -77,3 +77,19 @@ func Load() (*gcm.Mux, error) {
 
 	return m, nil
 }
+
+func SimpleExample() *gcm.Mux {
+	envProvider := gcm.NewEnvironmentProvider()
+	return &gcm.Mux{
+		Providers: map[string]gcm.Provider{
+			"debug": &gcm.BoolProviderSchema{
+				Provider: envProvider.Bool("APP_DEBUG"),
+			},
+			"port": &gcm.IntProviderSchema{
+				Default:  8000,
+				Validate: gcm.ValidateIntInSet(1, 5, 10),
+				Provider: envProvider.Int("APP_PORT"),
+			},
+		},
+	}
+}

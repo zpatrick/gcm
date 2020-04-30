@@ -1,7 +1,6 @@
 package gcm
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 )
@@ -81,6 +80,7 @@ func (m *Mux) MustInt(key string) int {
 	return i
 }
 
+/*
 type Provider interface {
 	Value() (interface{}, error)
 }
@@ -257,3 +257,4 @@ func (s *IntProviderSchema) Value() (interface{}, error) {
 
 	return v, nil
 }
+*/
